@@ -104,10 +104,9 @@ router.get("/class/:id", async (req, res) => {
 
 // Update a class id
 router.patch("/class/:id", async (req, res) => {
-  let collection = await db.collection("grades");
   let query = { class_id: Number(req.params.id) };
 
-  let result = await collection.updateMany(query, {
+  let result = await Grade.updateMany(query, {
     $set: { class_id: req.body.class_id }
   });
 
