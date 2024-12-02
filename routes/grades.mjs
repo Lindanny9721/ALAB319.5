@@ -27,13 +27,14 @@ router.get("/:id", async (req, res) => {
 
 // Add a score to a grade entry
 router.patch("/:id/add", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { _id: ObjectId(req.params.id) };
-
-  let result = await collection.updateOne(query, {
-    $push: { scores: req.body }
-  });
-
+  let result = await Grade.updateOne(
+    {
+      _id: req.params.id
+    },
+    {
+      $push: { scores: req.body }
+    }
+  )
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
 });
