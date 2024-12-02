@@ -1,12 +1,10 @@
 import express from "express";
-import db from "../db/conn.mjs";
-import { ObjectId } from "mongodb";
+import Grade from "../models/Grades.mjs"
 
 const router = express.Router();
 
 // Create a single grade entry
 router.post("/", async (req, res) => {
-  let collection = await db.collection("grades");
   let newDocument = req.body;
 
   // rename fields for backwards compatibility
@@ -14,16 +12,14 @@ router.post("/", async (req, res) => {
     newDocument.learner_id = newDocument.student_id;
     delete newDocument.student_id;
   }
-
-  let result = await collection.insertOne(newDocument);
+  let grade = new Grade(newDocument);
+  let result = await grade.save();
   res.send(result).status(204);
 });
 
 // Get a single grade entry
 router.get("/:id", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { _id: ObjectId(req.params.id) };
-  let result = await collection.findOne(query);
+  let result = await Grade.findById(req.params.id);
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
