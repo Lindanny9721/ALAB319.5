@@ -1,6 +1,5 @@
 import express from "express";
-import db from "../db/conn.mjs";
-import { ObjectId } from "mongodb";
+
 
 const router = express.Router();
 
@@ -235,28 +234,28 @@ async function createIndexes() {
   await collection.createIndex({ learner_id: 1});
   await collection.createIndex({ learner_id: 1, class_id: 1});
 }
-createIndexes();
-db.createCollection("newGrades", {
-  validator: {
-    $jsonSchema: {
-      bsonType: "object",
-      title: "Grade Object Validation",
-      required: ["class_id", "learner_id"],
-      properties: {
-        class_id: {
-          bsonType: "int",
-          minimum: 0,
-          maximum: 300,
-          description: "Must be inbetween 0 to 300"
-        },
-        learner_id: {
-          bsonType: "int",
-          minimum: 0,
-          description: "Must be greater than or equal to 0"
-        }
-      }
-    }
-  },
-  validationAction: "warn"
-})
+// createIndexes();
+// db.createCollection("newGrades", {
+//   validator: {
+//     $jsonSchema: {
+//       bsonType: "object",
+//       title: "Grade Object Validation",
+//       required: ["class_id", "learner_id"],
+//       properties: {
+//         class_id: {
+//           bsonType: "int",
+//           minimum: 0,
+//           maximum: 300,
+//           description: "Must be inbetween 0 to 300"
+//         },
+//         learner_id: {
+//           bsonType: "int",
+//           minimum: 0,
+//           description: "Must be greater than or equal to 0"
+//         }
+//       }
+//     }
+//   },
+//   validationAction: "warn"
+// })
 export default router;
