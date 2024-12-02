@@ -1,5 +1,6 @@
 import express from "express";
-
+import mongoose, { mongo } from "mongoose";
+import Grade from "../models/Grades.mjs";
 
 const router = express.Router();
 
@@ -19,9 +20,8 @@ const router = express.Router();
 
 // Get the weighted average of a specified learner's grades, per class
 router.get("/learner/:id/avg-class", async (req, res) => {
-  let collection = await db.collection("grades");
 
-  let result = await collection
+  let result = await Grade
     .aggregate([
       {
         $match: { learner_id: Number(req.params.id) },
@@ -75,15 +75,13 @@ router.get("/learner/:id/avg-class", async (req, res) => {
         },
       },
     ])
-    .toArray();
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
 });
 router.get("/stats", async (req, res) => {
-  let collection = await db.collection("grades");
 
-  let result = await collection
+  let result = await Grade
     .aggregate([
       {
         $unwind: { path: "$scores" },
@@ -138,17 +136,15 @@ router.get("/stats", async (req, res) => {
         },
       },
     ])
-    .toArray();
-  const totalLearners = (await collection.distinct("learner_id")).length;
+  const totalLearners = (await Grade.distinct("learner_id")).length;
   const learnersAbove70 = result.length;
   const percentageAbove70 = (learnersAbove70 / totalLearners) * 100;
   if (!result) res.send("Not found").status(404);
   else res.send({totalLearners, learnersAbove70, percentageAbove70}).status(200)
 });
 router.get("/stats/:id", async (req, res) => {
-  let collection = await db.collection("grades");
 
-  let result = await collection
+  let result = await Grade
     .aggregate([
       {
         $match: { class_id: Number(req.params.id) },
@@ -206,8 +202,7 @@ router.get("/stats/:id", async (req, res) => {
         },
       },
     ])
-    .toArray();
-  const totalLearnersInClass = await collection
+  const totalLearnersInClass = await Grade
     .aggregate([
       {
         $match: { class_id: Number(req.params.id) },
@@ -221,41 +216,39 @@ router.get("/stats/:id", async (req, res) => {
         $count: "learnerInClass",
       },
     ])
-    .toArray();
   const totalLearners = totalLearnersInClass.length > 0 ? totalLearnersInClass[0].learnerInClass : 0;
   const learnersAbove70 = result.length;
   const percentageAbove70 = (learnersAbove70 / totalLearners) * 100;
   if (!result) res.send("Not found").status(404);
   else res.send({totalLearners, learnersAbove70, percentageAbove70}).status(200)
 });
-async function createIndexes() {
-  const collection = await db.collection("grades");
-  await collection.createIndex({ class_id: 1});
-  await collection.createIndex({ learner_id: 1});
-  await collection.createIndex({ learner_id: 1, class_id: 1});
-}
-// createIndexes();
-// db.createCollection("newGrades", {
-//   validator: {
-//     $jsonSchema: {
-//       bsonType: "object",
-//       title: "Grade Object Validation",
-//       required: ["class_id", "learner_id"],
-//       properties: {
-//         class_id: {
-//           bsonType: "int",
-//           minimum: 0,
-//           maximum: 300,
-//           description: "Must be inbetween 0 to 300"
-//         },
-//         learner_id: {
-//           bsonType: "int",
-//           minimum: 0,
-//           description: "Must be greater than or equal to 0"
-//         }
-//       }
-//     }
-//   },
-//   validationAction: "warn"
-// })
+Grade.createIndexes();
+const newGradeSchema = new mongoose.Schema({
+  class_id: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 300
+  },
+  learner_id: {
+    type: Number,
+    required: true,
+    min: 0
+  }
+})
+//In case you wanted to test this newSchema
+// const newGrade = mongoose.model('newGrade', newGradeSchema);
+// async function testnewSchema() {
+//   const test1 = new newGrade({
+//     class_id: 10,
+//     learner_id: 20
+//   })
+//   await test1.save();
+//   const test2 = new newGrade({
+//     class_id: 301,
+//     learner_id: 2
+//   })
+//   await test2.save();
+// }
+// testnewSchema();
 export default router;
