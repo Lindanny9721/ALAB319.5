@@ -82,10 +82,9 @@ router.get("/learner/:id", async (req, res) => {
 
 // Delete a learner's grade data
 router.delete("/learner/:id", async (req, res) => {
-  let collection = await db.collection("grades");
   let query = { learner_id: Number(req.params.id) };
 
-  let result = await collection.deleteOne(query);
+  let result = await Grade.deleteOne(query);
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
