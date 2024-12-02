@@ -41,12 +41,14 @@ router.patch("/:id/add", async (req, res) => {
 
 // Remove a score from a grade entry
 router.patch("/:id/remove", async (req, res) => {
-  let collection = await db.collection("grades");
-  let query = { _id: ObjectId(req.params.id) };
-
-  let result = await collection.updateOne(query, {
-    $pull: { scores: req.body }
-  });
+  let result = await Grade.updateOne(
+    {
+      _id: req.params.id
+    },
+    {
+      $pull: { scores: req.body }
+    }
+  )
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
