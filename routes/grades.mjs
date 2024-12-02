@@ -69,13 +69,12 @@ router.get("/student/:id", async (req, res) => {
 
 // Get a learner's grade data
 router.get("/learner/:id", async (req, res) => {
-  let collection = await db.collection("grades");
   let query = { learner_id: Number(req.params.id) };
   
   // Check for class_id parameter
   if (req.query.class) query.class_id = Number(req.query.class);
 
-  let result = await collection.find(query).toArray();
+  let result = await Grade.find(query);
 
   if (!result) res.send("Not found").status(404);
   else res.send(result).status(200);
