@@ -102,7 +102,6 @@ router.get("/class/:id", async (req, res) => {
 
   // Check for learner_id parameter
   if (req.query.learner) query.learner_id = Number(req.query.learner);
-
   let result = await collection.find(query).toArray();
 
   if (!result) res.send("Not found").status(404);

@@ -1,15 +1,13 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
-const client = new MongoClient(process.env.MONGO_URI);
 
-let conn;
 try {
-  conn = await client.connect();
+  await mongoose.connect(process.env.MONGO_URI);
 } catch (e) {
   console.error(e);
 }
 
-let db = conn.db("sample_training");
+let db = mongoose.connection;
 
 export default db;
